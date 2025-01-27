@@ -1,8 +1,7 @@
 package io.github.bragabriel.library_api.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,8 +9,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name="book", schema = "public")
-@Getter
-@Setter
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Book {
 
     @Id
