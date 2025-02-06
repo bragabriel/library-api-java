@@ -11,6 +11,17 @@ import java.time.LocalDate;
 @UtilityClass
 public class BookObjectMother {
 
+    public static Book createBook(String title, Author author){
+        return Book.builder()
+                .isbn("isbn")
+                .title(title)
+                .publicationDate(LocalDate.now())
+                .genre(BookGenreEnum.FANTASY)
+                .price(BigDecimal.valueOf(50))
+                .author(author)
+                .build();
+    }
+
     public static Book createBookWithAuthor(Author author){
         return Book.builder()
                 .isbn("123")

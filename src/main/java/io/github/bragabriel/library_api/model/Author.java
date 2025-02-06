@@ -23,7 +23,7 @@ public class Author {
     @Column(length = 100, nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "DATE")
     private LocalDate birthdate;
 
     @Column(length = 50, nullable = false)

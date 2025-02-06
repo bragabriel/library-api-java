@@ -11,7 +11,7 @@ public class AuthorObjectMother {
     public static Author createAuthor(){
         return Author.builder()
                 .name("Gabriel")
-                .birthdate(LocalDate.of(1000, 1, 31))
+                .birthdate(LocalDate.of(2000, 1, 31))
                 .nationality("Brazilian")
                 .build();
     }
