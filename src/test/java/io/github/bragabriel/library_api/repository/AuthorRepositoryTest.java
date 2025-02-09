@@ -95,6 +95,56 @@ class AuthorRepositoryTest {
     @Test
     @Transactional
     void saveAuthorWithBooksTest(){
+        var savedAuthor = createAndSaveAuthorWithBooks();
+        bookRepository.saveAll(savedAuthor.getBookList());
+        var fetchedAuthor = authorRepository.findById(savedAuthor.getId()).orElse(null);
+
+        assert fetchedAuthor != null;
+        //Author asserts
+        assertNotNull(fetchedAuthor.getId());
+        assertEquals(savedAuthor.getName(), fetchedAuthor.getName());
+        assertEquals(savedAuthor.getBirthdate(), fetchedAuthor.getBirthdate());
+        assertEquals(savedAuthor.getNationality(), fetchedAuthor.getNationality());
+
+        //Book asserts
+        assertNotNull(fetchedAuthor.getBookList());
+
+        IntStream.range(0, fetchedAuthor.getBookList().size()).forEach(i -> {
+            Book fetchedBook = fetchedAuthor.getBookList().get(i);
+            Book originalBook = savedAuthor.getBookList().get(i);
+
+            assertNotNull(fetchedBook.getId());
+            assertEquals(savedAuthor, fetchedBook.getAuthor());
+            assertEquals(originalBook.getTitle(), fetchedBook.getTitle());
+            assertEquals(originalBook.getIsbn(), fetchedBook.getIsbn());
+            assertEquals(originalBook.getPublicationDate(), fetchedBook.getPublicationDate());
+            assertEquals(originalBook.getGenre(), fetchedBook.getGenre());
+            assertEquals(originalBook.getPrice(), fetchedBook.getPrice());
+        });
+    }
+
+    @Test
+    @Transactional
+    void findBooksByAuthor(){
+        Author savedAuthor = createAndSaveAuthorWithBooks();
+        bookRepository.saveAll(savedAuthor.getBookList());
+
+        var fetchedBooksByAuthor = bookRepository.findByAuthor(savedAuthor);
+
+        IntStream.range(0, savedAuthor.getBookList().size()).forEach(i -> {
+            Book originalBook = savedAuthor.getBookList().get(i);
+
+            assertNotNull(fetchedBooksByAuthor.get(i).getId());
+            assertEquals(savedAuthor, fetchedBooksByAuthor.get(i).getAuthor());
+            assertEquals(originalBook.getTitle(), fetchedBooksByAuthor.get(i).getTitle());
+            assertEquals(originalBook.getIsbn(), fetchedBooksByAuthor.get(i).getIsbn());
+            assertEquals(originalBook.getPublicationDate(), fetchedBooksByAuthor.get(i).getPublicationDate());
+            assertEquals(originalBook.getGenre(), fetchedBooksByAuthor.get(i).getGenre());
+            assertEquals(originalBook.getPrice(), fetchedBooksByAuthor.get(i).getPrice());
+        });
+    }
+
+    private Author createAndSaveAuthorWithBooks() {
         Author author = AuthorObjectMother.createAuthor();
 
         List<Book> bookList = List.of(
@@ -103,33 +153,6 @@ class AuthorRepositoryTest {
         );
         author.setBookList(bookList);
 
-        var savedAuthor = authorRepository.save(author);
-        bookRepository.saveAll(bookList);
-        var fetchedAuthor = authorRepository.findById(savedAuthor.getId()).orElse(null);
-
-        assert fetchedAuthor != null;
-
-        //Author asserts
-        assertNotNull(fetchedAuthor.getId());
-        assertEquals(author.getName(), fetchedAuthor.getName());
-        assertEquals(author.getBirthdate(), fetchedAuthor.getBirthdate());
-        assertEquals(author.getNationality(), fetchedAuthor.getNationality());
-
-        //Book asserts
-        assertNotNull(fetchedAuthor.getBookList());
-
-        IntStream.range(0, fetchedAuthor.getBookList().size()).forEach(i -> {
-
-            Book fetchedBook = fetchedAuthor.getBookList().get(i);
-            Book originalBook = author.getBookList().get(i);
-
-            assertNotNull(fetchedBook.getId());
-            assertEquals(author, fetchedBook.getAuthor());
-            assertEquals(originalBook.getTitle(), fetchedBook.getTitle());
-            assertEquals(originalBook.getIsbn(), fetchedBook.getIsbn());
-            assertEquals(originalBook.getPublicationDate(), fetchedBook.getPublicationDate());
-            assertEquals(originalBook.getGenre(), fetchedBook.getGenre());
-            assertEquals(originalBook.getPrice(), fetchedBook.getPrice());
-        });
+        return authorRepository.save(author);
     }
 }
