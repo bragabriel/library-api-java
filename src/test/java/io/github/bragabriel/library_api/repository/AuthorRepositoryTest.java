@@ -96,7 +96,6 @@ class AuthorRepositoryTest {
     @Transactional
     void saveAuthorWithBooksTest(){
         var savedAuthor = createAndSaveAuthorWithBooks();
-        bookRepository.saveAll(savedAuthor.getBookList());
         var fetchedAuthor = authorRepository.findById(savedAuthor.getId()).orElse(null);
 
         assert fetchedAuthor != null;
@@ -125,23 +124,43 @@ class AuthorRepositoryTest {
 
     @Test
     @Transactional
-    void findBooksByAuthor(){
+    void findBooksByAuthorTest(){
         Author savedAuthor = createAndSaveAuthorWithBooks();
-        bookRepository.saveAll(savedAuthor.getBookList());
-
-        var fetchedBooksByAuthor = bookRepository.findByAuthor(savedAuthor);
+        var foundBooksByAuthor = bookRepository.findByAuthor(savedAuthor);
 
         IntStream.range(0, savedAuthor.getBookList().size()).forEach(i -> {
             Book originalBook = savedAuthor.getBookList().get(i);
 
-            assertNotNull(fetchedBooksByAuthor.get(i).getId());
-            assertEquals(savedAuthor, fetchedBooksByAuthor.get(i).getAuthor());
-            assertEquals(originalBook.getTitle(), fetchedBooksByAuthor.get(i).getTitle());
-            assertEquals(originalBook.getIsbn(), fetchedBooksByAuthor.get(i).getIsbn());
-            assertEquals(originalBook.getPublicationDate(), fetchedBooksByAuthor.get(i).getPublicationDate());
-            assertEquals(originalBook.getGenre(), fetchedBooksByAuthor.get(i).getGenre());
-            assertEquals(originalBook.getPrice(), fetchedBooksByAuthor.get(i).getPrice());
+            assertNotNull(foundBooksByAuthor.get(i).getId());
+            assertEquals(savedAuthor, foundBooksByAuthor.get(i).getAuthor());
+            assertEquals(originalBook.getTitle(), foundBooksByAuthor.get(i).getTitle());
+            assertEquals(originalBook.getIsbn(), foundBooksByAuthor.get(i).getIsbn());
+            assertEquals(originalBook.getPublicationDate(), foundBooksByAuthor.get(i).getPublicationDate());
+            assertEquals(originalBook.getGenre(), foundBooksByAuthor.get(i).getGenre());
+            assertEquals(originalBook.getPrice(), foundBooksByAuthor.get(i).getPrice());
         });
+    }
+
+    @Test
+    @Transactional
+    void findBooksByAuthorAndPriceTest(){
+        Author savedAuthor = createAndSaveAuthorWithBooks();
+        Book book = savedAuthor.getBookList().getFirst();
+
+        var bookTitle = book.getTitle();
+        var bookPrice = book.getPrice();
+
+        var foundBooksByTitleAndPrice = bookRepository.findByTitleAndPrice(bookTitle, bookPrice);
+
+        Book firstFoundedBook = foundBooksByTitleAndPrice.getFirst();
+
+        assertNotNull(firstFoundedBook.getId());
+        assertEquals(savedAuthor, firstFoundedBook.getAuthor());
+        assertEquals(book.getTitle(), firstFoundedBook.getTitle());
+        assertEquals(book.getIsbn(), firstFoundedBook.getIsbn());
+        assertEquals(book.getPublicationDate(), firstFoundedBook.getPublicationDate());
+        assertEquals(book.getGenre(), firstFoundedBook.getGenre());
+        assertEquals(book.getPrice(), firstFoundedBook.getPrice());
     }
 
     private Author createAndSaveAuthorWithBooks() {
@@ -152,6 +171,7 @@ class AuthorRepositoryTest {
                 BookObjectMother.createBook("A Clash of Kings", author)
         );
         author.setBookList(bookList);
+        bookRepository.saveAll(author.getBookList());
 
         return authorRepository.save(author);
     }
