@@ -2,6 +2,7 @@ package io.github.bragabriel.library_api.repository;
 
 import io.github.bragabriel.library_api.model.Author;
 import io.github.bragabriel.library_api.model.Book;
+import io.github.bragabriel.library_api.model.BookGenreEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +15,6 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
     List<Book> findByAuthor(Author author);
 
     List<Book> findByTitleAndPrice(String title, BigDecimal price);
+
+    List<Book> findByTitleOrGenre(String title, BookGenreEnum genre);
 }
