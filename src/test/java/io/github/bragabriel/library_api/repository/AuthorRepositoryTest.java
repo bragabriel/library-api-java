@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.IntStream;
@@ -92,24 +93,29 @@ class AuthorRepositoryTest {
     }
 
     @Test
+    @Transactional
     void saveAuthorWithBooksTest(){
         Author author = AuthorObjectMother.createAuthor();
-        var savedAuthor = authorRepository.save(author);
 
         List<Book> bookList = List.of(
                 BookObjectMother.createBook("A Song of Ice and Fire", author),
                 BookObjectMother.createBook("A Clash of Kings", author)
         );
-        bookRepository.saveAll(bookList);
+        author.setBookList(bookList);
 
+        var savedAuthor = authorRepository.save(author);
+        bookRepository.saveAll(bookList);
         var fetchedAuthor = authorRepository.findById(savedAuthor.getId()).orElse(null);
 
         assert fetchedAuthor != null;
+
+        //Author asserts
         assertNotNull(fetchedAuthor.getId());
         assertEquals(author.getName(), fetchedAuthor.getName());
         assertEquals(author.getBirthdate(), fetchedAuthor.getBirthdate());
         assertEquals(author.getNationality(), fetchedAuthor.getNationality());
 
+        //Book asserts
         assertNotNull(fetchedAuthor.getBookList());
 
         IntStream.range(0, fetchedAuthor.getBookList().size()).forEach(i -> {
