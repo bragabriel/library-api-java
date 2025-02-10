@@ -9,9 +9,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,6 +31,7 @@ class BookRepositoryTest {
     @BeforeEach
     public void setUp(){
         bookRepository.deleteAll();
+        authorRepository.deleteAll();
     }
 
     @Test
@@ -80,6 +84,108 @@ class BookRepositoryTest {
         Optional<Book> deletedBook = bookRepository.findById(book.getId());
 
         assertFalse(deletedBook.isPresent());
+    }
+
+    @Test
+    @Transactional
+    void findBooksByAuthorTest(){
+        Author savedAuthor = createAndSaveAuthorWithBooks();
+        var foundBooksByAuthor = bookRepository.findByAuthor(savedAuthor);
+
+        IntStream.range(0, savedAuthor.getBookList().size()).forEach(i -> {
+            Book originalBook = savedAuthor.getBookList().get(i);
+
+            assertNotNull(foundBooksByAuthor.get(i).getId());
+            assertEquals(savedAuthor, foundBooksByAuthor.get(i).getAuthor());
+            assertEquals(originalBook.getTitle(), foundBooksByAuthor.get(i).getTitle());
+            assertEquals(originalBook.getIsbn(), foundBooksByAuthor.get(i).getIsbn());
+            assertEquals(originalBook.getPublicationDate(), foundBooksByAuthor.get(i).getPublicationDate());
+            assertEquals(originalBook.getGenre(), foundBooksByAuthor.get(i).getGenre());
+            assertEquals(originalBook.getPrice(), foundBooksByAuthor.get(i).getPrice());
+        });
+    }
+
+    @Test
+    @Transactional
+    void findBooksByAuthorAndPriceTest(){
+        Author savedAuthor = createAndSaveAuthorWithBooks();
+        Book book = savedAuthor.getBookList().getFirst();
+
+        var bookTitle = book.getTitle();
+        var bookPrice = book.getPrice();
+
+        var foundBooksByTitleAndPrice = bookRepository.findByTitleAndPrice(bookTitle, bookPrice);
+
+        Book firstFoundedBook = foundBooksByTitleAndPrice.getFirst();
+
+        assertNotNull(firstFoundedBook.getId());
+        assertEquals(savedAuthor, firstFoundedBook.getAuthor());
+        assertEquals(book.getTitle(), firstFoundedBook.getTitle());
+        assertEquals(book.getIsbn(), firstFoundedBook.getIsbn());
+        assertEquals(book.getPublicationDate(), firstFoundedBook.getPublicationDate());
+        assertEquals(book.getGenre(), firstFoundedBook.getGenre());
+        assertEquals(book.getPrice(), firstFoundedBook.getPrice());
+    }
+
+    @Test
+    @Transactional
+    void findBooksByTitleOrGenreWhenTitleIsNullTest(){
+        Author savedAuthor = createAndSaveAuthorWithBooks();
+        Book book = savedAuthor.getBookList().getFirst();
+
+        var bookGenre = book.getGenre();
+
+        var foundBooksByTitleAndPrice = bookRepository.findByTitleOrGenre(null, bookGenre);
+
+        Book firstFoundedBook = foundBooksByTitleAndPrice.getFirst();
+
+        assertNotNull(firstFoundedBook.getId());
+        assertEquals(savedAuthor, firstFoundedBook.getAuthor());
+        assertEquals(book.getTitle(), firstFoundedBook.getTitle());
+        assertEquals(book.getIsbn(), firstFoundedBook.getIsbn());
+        assertEquals(book.getPublicationDate(), firstFoundedBook.getPublicationDate());
+        assertEquals(book.getGenre(), firstFoundedBook.getGenre());
+        assertEquals(book.getPrice(), firstFoundedBook.getPrice());
+    }
+
+    @Test
+    @Transactional
+    void listAllOrderedByTitleAndPriceTest(){
+        var author1 = AuthorObjectMother.createAuthorNamed("J. K. Rowling");
+        var author2 = AuthorObjectMother.createAuthorNamed("George R. R. Martin");
+        authorRepository.save(author1);
+        authorRepository.save(author2);
+
+        List<Book> bookList = List.of(
+                BookObjectMother.createBookWithTitleAndPrice("Harry Potter", BigDecimal.valueOf(45), author1),
+                BookObjectMother.createBookWithTitleAndPrice("A Song of Ice and Fire", BigDecimal.valueOf(50), author2),
+                BookObjectMother.createBookWithTitleAndPrice("A Clash of Kings", BigDecimal.valueOf(80), author2)
+        );
+        bookRepository.saveAll(bookList);
+
+        var orderedBooks = bookRepository.listAllOrderedByTitleAndPrice();
+
+        assertEquals("A Clash of Kings", orderedBooks.get(0).getTitle());
+        assertEquals(BigDecimal.valueOf(80), orderedBooks.get(0).getPrice());
+
+        assertEquals("A Song of Ice and Fire", orderedBooks.get(1).getTitle());
+        assertEquals(BigDecimal.valueOf(50), orderedBooks.get(1).getPrice());
+
+        assertEquals("Harry Potter", orderedBooks.get(2).getTitle());
+        assertEquals(BigDecimal.valueOf(45), orderedBooks.get(2).getPrice());
+    }
+
+    private Author createAndSaveAuthorWithBooks() {
+        Author author = AuthorObjectMother.createAuthor();
+
+        List<Book> bookList = List.of(
+                BookObjectMother.createBook("A Song of Ice and Fire", author),
+                BookObjectMother.createBook("A Clash of Kings", author)
+        );
+        author.setBookList(bookList);
+        bookRepository.saveAll(author.getBookList());
+
+        return authorRepository.save(author);
     }
 
     private Book createAndSaveBookWithExistingAuthor() {

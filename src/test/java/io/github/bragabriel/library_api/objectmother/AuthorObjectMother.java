@@ -15,4 +15,12 @@ public class AuthorObjectMother {
                 .nationality("Brazilian")
                 .build();
     }
+
+    public static Author createAuthorNamed(String name){
+        return Author.builder()
+                .name(name)
+                .birthdate(LocalDate.of(2000, 1, 31))
+                .nationality("Brazilian")
+                .build();
+    }
 }

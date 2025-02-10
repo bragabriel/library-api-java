@@ -22,6 +22,17 @@ public class BookObjectMother {
                 .build();
     }
 
+    public static Book createBookWithTitleAndPrice(String title, BigDecimal price, Author author){
+        return Book.builder()
+                .isbn("isbn")
+                .title(title)
+                .publicationDate(LocalDate.now())
+                .genre(BookGenreEnum.FANTASY)
+                .price(price)
+                .author(author)
+                .build();
+    }
+
     public static Book createBookWithAuthor(Author author){
         return Book.builder()
                 .isbn("123")

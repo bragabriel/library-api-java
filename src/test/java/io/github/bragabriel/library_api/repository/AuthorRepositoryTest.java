@@ -122,68 +122,6 @@ class AuthorRepositoryTest {
         });
     }
 
-    @Test
-    @Transactional
-    void findBooksByAuthorTest(){
-        Author savedAuthor = createAndSaveAuthorWithBooks();
-        var foundBooksByAuthor = bookRepository.findByAuthor(savedAuthor);
-
-        IntStream.range(0, savedAuthor.getBookList().size()).forEach(i -> {
-            Book originalBook = savedAuthor.getBookList().get(i);
-
-            assertNotNull(foundBooksByAuthor.get(i).getId());
-            assertEquals(savedAuthor, foundBooksByAuthor.get(i).getAuthor());
-            assertEquals(originalBook.getTitle(), foundBooksByAuthor.get(i).getTitle());
-            assertEquals(originalBook.getIsbn(), foundBooksByAuthor.get(i).getIsbn());
-            assertEquals(originalBook.getPublicationDate(), foundBooksByAuthor.get(i).getPublicationDate());
-            assertEquals(originalBook.getGenre(), foundBooksByAuthor.get(i).getGenre());
-            assertEquals(originalBook.getPrice(), foundBooksByAuthor.get(i).getPrice());
-        });
-    }
-
-    @Test
-    @Transactional
-    void findBooksByAuthorAndPriceTest(){
-        Author savedAuthor = createAndSaveAuthorWithBooks();
-        Book book = savedAuthor.getBookList().getFirst();
-
-        var bookTitle = book.getTitle();
-        var bookPrice = book.getPrice();
-
-        var foundBooksByTitleAndPrice = bookRepository.findByTitleAndPrice(bookTitle, bookPrice);
-
-        Book firstFoundedBook = foundBooksByTitleAndPrice.getFirst();
-
-        assertNotNull(firstFoundedBook.getId());
-        assertEquals(savedAuthor, firstFoundedBook.getAuthor());
-        assertEquals(book.getTitle(), firstFoundedBook.getTitle());
-        assertEquals(book.getIsbn(), firstFoundedBook.getIsbn());
-        assertEquals(book.getPublicationDate(), firstFoundedBook.getPublicationDate());
-        assertEquals(book.getGenre(), firstFoundedBook.getGenre());
-        assertEquals(book.getPrice(), firstFoundedBook.getPrice());
-    }
-
-    @Test
-    @Transactional
-    void findBooksByTitleOrGenreWhenTitleIsNullTest(){
-        Author savedAuthor = createAndSaveAuthorWithBooks();
-        Book book = savedAuthor.getBookList().getFirst();
-
-        var bookGenre = book.getGenre();
-
-        var foundBooksByTitleAndPrice = bookRepository.findByTitleOrGenre(null, bookGenre);
-
-        Book firstFoundedBook = foundBooksByTitleAndPrice.getFirst();
-
-        assertNotNull(firstFoundedBook.getId());
-        assertEquals(savedAuthor, firstFoundedBook.getAuthor());
-        assertEquals(book.getTitle(), firstFoundedBook.getTitle());
-        assertEquals(book.getIsbn(), firstFoundedBook.getIsbn());
-        assertEquals(book.getPublicationDate(), firstFoundedBook.getPublicationDate());
-        assertEquals(book.getGenre(), firstFoundedBook.getGenre());
-        assertEquals(book.getPrice(), firstFoundedBook.getPrice());
-    }
-
     private Author createAndSaveAuthorWithBooks() {
         Author author = AuthorObjectMother.createAuthor();
 
