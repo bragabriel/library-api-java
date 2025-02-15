@@ -22,6 +22,17 @@ public class BookObjectMother {
                 .build();
     }
 
+    public static Book createBookWithTitleAndDateAndAuthor(String title, LocalDate publicationDate, Author author){
+        return Book.builder()
+                .isbn("isbn")
+                .title(title)
+                .publicationDate(publicationDate)
+                .genre(BookGenreEnum.FANTASY)
+                .price(BigDecimal.valueOf(50))
+                .author(author)
+                .build();
+    }
+
     public static Book createBookWithTitleAndPrice(String title, BigDecimal price, Author author){
         return Book.builder()
                 .isbn("isbn")
@@ -43,4 +54,28 @@ public class BookObjectMother {
                 .author(author)
                 .build();
     }
+
+    public static Book createBookWithTitleAndPriceAndGenreAndDate(String title, BigDecimal price, Author author){
+        return Book.builder()
+                .isbn("isbn")
+                .title(title)
+                .publicationDate(LocalDate.now())
+                .genre(BookGenreEnum.FANTASY)
+                .price(price)
+                .author(author)
+                .build();
+    }
+
+    public static Book createBookWithTitleAndPriceAndGenreAndDate(
+            String title, BigDecimal price, BookGenreEnum genre, LocalDate publicationDate, Author author){
+        return Book.builder()
+                .isbn("isbn")
+                .title(title)
+                .publicationDate(publicationDate)
+                .genre(genre)
+                .price(price)
+                .author(author)
+                .build();
+    }
+
 }

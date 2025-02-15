@@ -2,16 +2,19 @@ package io.github.bragabriel.library_api.repository;
 
 import io.github.bragabriel.library_api.model.Author;
 import io.github.bragabriel.library_api.model.Book;
+import io.github.bragabriel.library_api.model.BookGenreEnum;
 import io.github.bragabriel.library_api.objectmother.AuthorObjectMother;
 import io.github.bragabriel.library_api.objectmother.BookObjectMother;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -150,7 +153,7 @@ class BookRepositoryTest {
 
     @Test
     @Transactional
-    void listAllOrderedByTitleAndPriceTest(){
+    void listAllOrderedByTitleAndPriceWithPriceRangeTest(){
         var author1 = AuthorObjectMother.createAuthorNamed("J. K. Rowling");
         var author2 = AuthorObjectMother.createAuthorNamed("George R. R. Martin");
         authorRepository.save(author1);
@@ -159,11 +162,12 @@ class BookRepositoryTest {
         List<Book> bookList = List.of(
                 BookObjectMother.createBookWithTitleAndPrice("Harry Potter", BigDecimal.valueOf(45), author1),
                 BookObjectMother.createBookWithTitleAndPrice("A Song of Ice and Fire", BigDecimal.valueOf(50), author2),
-                BookObjectMother.createBookWithTitleAndPrice("A Clash of Kings", BigDecimal.valueOf(80), author2)
+                BookObjectMother.createBookWithTitleAndPrice("A Clash of Kings", BigDecimal.valueOf(80), author2),
+                BookObjectMother.createBookWithTitleAndPrice("A Study in Scarlet", BigDecimal.valueOf(100), author2)
         );
         bookRepository.saveAll(bookList);
 
-        var orderedBooks = bookRepository.listAllOrderedByTitleAndPrice();
+        var orderedBooks = bookRepository.listAllOrderedByTitleAndPrice("80");
 
         assertEquals("A Clash of Kings", orderedBooks.get(0).getTitle());
         assertEquals(BigDecimal.valueOf(80), orderedBooks.get(0).getPrice());
@@ -173,6 +177,40 @@ class BookRepositoryTest {
 
         assertEquals("Harry Potter", orderedBooks.get(2).getTitle());
         assertEquals(BigDecimal.valueOf(45), orderedBooks.get(2).getPrice());
+    }
+
+    @Test
+    @Transactional
+    void listAllByByGenreSortedTest(){
+        createAndSaveBooksWithExistingAuthor();
+
+        List<Book> romanceBooks = bookRepository.findByGenre(
+                BookGenreEnum.ROMANCE,
+                Sort.by(Sort.Direction.ASC, "price")
+        );
+
+        // Asserts for ROMANCE books, sorted by price
+        assertNotNull(romanceBooks);
+        assertEquals(2, romanceBooks.size());
+        assertEquals(BigDecimal.valueOf(30), romanceBooks.get(0).getPrice());
+        assertEquals(BigDecimal.valueOf(55), romanceBooks.get(1).getPrice());
+    }
+
+    @Test
+    @Transactional
+    void listAllByGenrePositionalParamsTest(){
+        createAndSaveBooksWithExistingAuthor();
+
+        List<Book> romanceBooks = bookRepository.findByGenreAndTitlePositionalParams(
+                BookGenreEnum.ROMANCE,
+                "Romeo and Juliet"
+        );
+
+        // Asserts for ROMANCE books, by genre and title
+        assertNotNull(romanceBooks);
+        assertEquals(1, romanceBooks.size());
+        assertEquals("Romeo and Juliet", romanceBooks.getFirst().getTitle());
+        assertEquals(BookGenreEnum.ROMANCE, romanceBooks.getFirst().getGenre());
     }
 
     private Author createAndSaveAuthorWithBooks() {
@@ -188,6 +226,19 @@ class BookRepositoryTest {
         return authorRepository.save(author);
     }
 
+    private Author createAndSaveNamedAuthorWithBooks(String name) {
+        Author author = AuthorObjectMother.createAuthorNamed(name);
+
+        List<Book> bookList = List.of(
+                BookObjectMother.createBookWithTitleAndDateAndAuthor("The Hound of the Baskervilles", LocalDate.of(1902, 4, 12), author),
+                BookObjectMother.createBookWithTitleAndDateAndAuthor("A Study in Scarlet", LocalDate.of(1887, 11, 1), author)
+        );
+        author.setBookList(bookList);
+        bookRepository.saveAll(author.getBookList());
+
+        return authorRepository.save(author);
+    }
+
     private Book createAndSaveBookWithExistingAuthor() {
         Author author = AuthorObjectMother.createAuthor();
         authorRepository.save(author);
@@ -196,5 +247,19 @@ class BookRepositoryTest {
         bookRepository.save(book);
 
         return book;
+    }
+
+    private void createAndSaveBooksWithExistingAuthor() {
+        Author author = AuthorObjectMother.createAuthor();
+
+        List<Book> bookList = List.of(
+                BookObjectMother.createBookWithTitleAndPriceAndGenreAndDate("The Fault in Our Stars", BigDecimal.valueOf(55), BookGenreEnum.ROMANCE, LocalDate.of(1597, 10, 10),author),
+                BookObjectMother.createBookWithTitleAndPriceAndGenreAndDate("A Clash of Kings", BigDecimal.valueOf(50), BookGenreEnum.FICTION, LocalDate.of(1998, 11, 16), author),
+                BookObjectMother.createBookWithTitleAndPriceAndGenreAndDate("Romeo and Juliet", BigDecimal.valueOf(30), BookGenreEnum.ROMANCE, LocalDate.of(2012, 1, 1), author)
+        );
+        author.setBookList(bookList);
+        authorRepository.save(author);
+
+        bookRepository.saveAll(bookList);
     }
 }
