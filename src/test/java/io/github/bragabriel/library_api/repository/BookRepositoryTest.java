@@ -213,6 +213,17 @@ class BookRepositoryTest {
         assertEquals(BookGenreEnum.ROMANCE, romanceBooks.getFirst().getGenre());
     }
 
+    @Test
+    void deleteByGenreTest(){
+        createAndSaveBooksWithExistingAuthor();
+
+        bookRepository.deleteByGenre(BookGenreEnum.ROMANCE);
+        List<Book> fetchedBooks = bookRepository.findAll();
+
+        assertEquals(1, fetchedBooks.size());
+        assertNotEquals(BookGenreEnum.ROMANCE, fetchedBooks.getFirst().getGenre());
+    }
+
     private Author createAndSaveAuthorWithBooks() {
         Author author = AuthorObjectMother.createAuthor();
 

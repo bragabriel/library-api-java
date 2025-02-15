@@ -5,9 +5,11 @@ import io.github.bragabriel.library_api.model.Book;
 import io.github.bragabriel.library_api.model.BookGenreEnum;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -39,4 +41,10 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
     List<Book> findByGenreAndTitlePositionalParams(
             BookGenreEnum genre, String title
     );
+
+    //JPQL - With modification to the database
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Book b WHERE genre = ?1")
+    void deleteByGenre(BookGenreEnum genre);
 }
