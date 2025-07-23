@@ -224,6 +224,17 @@ class BookRepositoryTest {
         assertNotEquals(BookGenreEnum.ROMANCE, fetchedBooks.getFirst().getGenre());
     }
 
+    @Test
+    void updatePublicationDate(){
+        Book book = createAndSaveBookWithExistingAuthor();
+        LocalDate newDate = LocalDate.of(2000, 12, 1);
+
+        bookRepository.updatePublicationDateByTitle(newDate, book.getTitle());
+        List<Book> fetchedBooks = bookRepository.findAll();
+
+        assertEquals(newDate, fetchedBooks.getFirst().getPublicationDate());
+    }
+
     private Author createAndSaveAuthorWithBooks() {
         Author author = AuthorObjectMother.createAuthor();
 

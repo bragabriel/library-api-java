@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,4 +48,9 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
     @Transactional
     @Query("DELETE FROM Book b WHERE genre = ?1")
     void deleteByGenre(BookGenreEnum genre);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Book b set b.publicationDate = ?1 WHERE b.title = ?2")
+    void updatePublicationDateByTitle(LocalDate newDate, String title);
 }
