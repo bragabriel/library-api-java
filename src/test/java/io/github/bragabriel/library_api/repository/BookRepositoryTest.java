@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -152,7 +153,6 @@ class BookRepositoryTest {
     }
 
     @Test
-    @Transactional
     void listAllOrderedByTitleAndPriceWithPriceRangeTest(){
         var author1 = AuthorObjectMother.createAuthorNamed("J. K. Rowling");
         var author2 = AuthorObjectMother.createAuthorNamed("George R. R. Martin");
@@ -170,17 +170,16 @@ class BookRepositoryTest {
         var orderedBooks = bookRepository.listAllOrderedByTitleAndPrice("80");
 
         assertEquals("A Clash of Kings", orderedBooks.get(0).getTitle());
-        assertEquals(BigDecimal.valueOf(80), orderedBooks.get(0).getPrice());
+        assertEquals(new BigDecimal("80.00"), orderedBooks.get(0).getPrice());
 
         assertEquals("A Song of Ice and Fire", orderedBooks.get(1).getTitle());
-        assertEquals(BigDecimal.valueOf(50), orderedBooks.get(1).getPrice());
+        assertEquals(new BigDecimal("50.00"), orderedBooks.get(1).getPrice());
 
         assertEquals("Harry Potter", orderedBooks.get(2).getTitle());
-        assertEquals(BigDecimal.valueOf(45), orderedBooks.get(2).getPrice());
+        assertEquals(new BigDecimal("45.00"), orderedBooks.get(2).getPrice());
     }
 
     @Test
-    @Transactional
     void listAllByByGenreSortedTest(){
         createAndSaveBooksWithExistingAuthor();
 
@@ -192,12 +191,11 @@ class BookRepositoryTest {
         // Asserts for ROMANCE books, sorted by price
         assertNotNull(romanceBooks);
         assertEquals(2, romanceBooks.size());
-        assertEquals(BigDecimal.valueOf(30), romanceBooks.get(0).getPrice());
-        assertEquals(BigDecimal.valueOf(55), romanceBooks.get(1).getPrice());
+        assertEquals(BigDecimal.valueOf(30).setScale(2, RoundingMode.CEILING), romanceBooks.get(0).getPrice());
+        assertEquals(BigDecimal.valueOf(55).setScale(2, RoundingMode.CEILING), romanceBooks.get(1).getPrice());
     }
 
     @Test
-    @Transactional
     void listAllByGenrePositionalParamsTest(){
         createAndSaveBooksWithExistingAuthor();
 
@@ -233,6 +231,32 @@ class BookRepositoryTest {
         List<Book> fetchedBooks = bookRepository.findAll();
 
         assertEquals(newDate, fetchedBooks.getFirst().getPublicationDate());
+    }
+
+    @Test
+    void explicacaoVideo(){
+        Author author = Author.builder()
+            .name("Gabriel")
+            .birthdate(LocalDate.of(2000, 1, 31))
+            .nationality("Brazilian")
+            .build();
+
+        Book book = Book.builder()
+            .isbn("isbn")
+            .title("asd")
+            .publicationDate(LocalDate.now())
+            .genre(BookGenreEnum.FANTASY)
+            .price(BigDecimal.valueOf(50))
+            .author(author)
+            .build();
+
+        var authorSaved = authorRepository.save(author);
+        assertNotNull(authorSaved);
+        var bookSaved = bookRepository.save(book);
+        assertNotNull(bookSaved);
+
+        author.setBookList(List.of(bookSaved));
+        authorRepository.save(author);
     }
 
     private Author createAndSaveAuthorWithBooks() {
