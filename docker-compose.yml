@@ -12,7 +12,7 @@ services:
       POSTGRES_DB: library
     volumes:
       - library_data:/var/lib/postgresql/data
-    restart: always
+    restart: no
 
   pgadmin:
     image: dpage/pgadmin4
@@ -24,7 +24,7 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     depends_on:
       - librarydb
-    restart: always
+    restart: no
 
 volumes:
   library_data:
