@@ -1,8 +1,12 @@
 package io.github.bragabriel.library_api.service;
 
+import io.github.bragabriel.library_api.exceptions.NotAllowedException;
 import io.github.bragabriel.library_api.model.Author;
 import io.github.bragabriel.library_api.repository.AuthorRepository;
+import io.github.bragabriel.library_api.repository.BookRepository;
 import io.github.bragabriel.library_api.specification.AuthorSpecification;
+import io.github.bragabriel.library_api.validator.AuthorValidator;
+import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 
@@ -11,15 +15,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AuthorService {
 
 	private final AuthorRepository authorRepository;
-
-	public AuthorService(AuthorRepository authorRepository) {
-		this.authorRepository = authorRepository;
-	}
+	private final AuthorValidator validator;
+	private final BookRepository bookRepository;
 
 	public Author save(Author author){
+		validator.validate(author);
 		return authorRepository.save(author);
 	}
 
@@ -35,12 +39,18 @@ public class AuthorService {
 	}
 
 	public void delete(Author author){
+		if(hasBook(author)){
+			throw new NotAllowedException("You cannot delete an author who has books");
+		}
 		authorRepository.delete(author);
 	}
 
 	public List<Author> find(String name, String nationality){
 		return authorRepository.findAll(AuthorSpecification.findByNameAndNationality(name, nationality));
+	}
 
+	public boolean hasBook(Author author){
+		return bookRepository.existsByAuthor(author);
 	}
 
 }

@@ -1,8 +1,13 @@
 package io.github.bragabriel.library_api.controller;
 
 import io.github.bragabriel.library_api.dto.AuthorDto;
+import io.github.bragabriel.library_api.dto.ErrorResponse;
+import io.github.bragabriel.library_api.exceptions.DuplicatedRegisterException;
+import io.github.bragabriel.library_api.exceptions.NotAllowedException;
 import io.github.bragabriel.library_api.model.Author;
 import io.github.bragabriel.library_api.service.AuthorService;
+import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,26 +22,28 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/authors")
+@RequiredArgsConstructor
 public class AuthorController {
 
 	private final AuthorService authorService;
 
-	public AuthorController(AuthorService authorService) {
-		this.authorService = authorService;
-	}
-
 	@PostMapping
-	public Object save(@RequestBody AuthorDto author){
-		Author authorEntity = author.mapToAuthorEntity();
-		authorService.save(authorEntity);
+	public ResponseEntity<Object> save(@RequestBody AuthorDto author){
+		try{
+			Author authorEntity = author.mapToAuthorEntity();
+			authorService.save(authorEntity);
 
-		URI location = ServletUriComponentsBuilder
-				.fromCurrentRequest()
-				.path("/{id}")
-				.buildAndExpand(authorEntity.getId())
-				.toUri();
+			URI location = ServletUriComponentsBuilder
+					.fromCurrentRequest()
+					.path("/{id}")
+					.buildAndExpand(authorEntity.getId())
+					.toUri();
 
-		return ResponseEntity.created(location).build();
+			return ResponseEntity.created(location).build();
+		}catch (DuplicatedRegisterException e){
+			ErrorResponse errorResponse = ErrorResponse.conflict(e.getMessage());
+			return ResponseEntity.status(errorResponse.status()).body(errorResponse);
+		}
 	}
 
 	@GetMapping("{id}")
@@ -51,13 +58,19 @@ public class AuthorController {
 	}
 
 	@DeleteMapping("{id}")
-	public ResponseEntity<Void> delete(@PathVariable("id") String id){
-		var idAuthor = UUID.fromString(id);
-		Author author = authorService.getById(idAuthor)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+	public ResponseEntity<Object> delete(@PathVariable("id") String id){
+		try{
+			var idAuthor = UUID.fromString(id);
+			Author author = authorService.getById(idAuthor)
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-		authorService.delete(author);
-		return ResponseEntity.noContent().build();
+			authorService.delete(author);
+			return ResponseEntity.noContent().build();
+		}catch (NotAllowedException e){
+			ErrorResponse errorResponse = ErrorResponse.defaultResponse(e.getMessage());
+			return ResponseEntity.status(errorResponse.status()).body(errorResponse);
+		}
+
 	}
 
 	@GetMapping
@@ -78,20 +91,25 @@ public class AuthorController {
 	}
 
 	@PutMapping("{id}")
-	public ResponseEntity<Void> update(
+	public ResponseEntity<Object> update(
 			@PathVariable("id") String id,
 			@RequestBody AuthorDto authorDto
-	){
-		var idAuthor = UUID.fromString(id);
-		Author author = authorService.getById(idAuthor)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+	) {
+		try{
+			var idAuthor = UUID.fromString(id);
+			Author author = authorService.getById(idAuthor)
+					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-		author.setName(authorDto.name());
-		author.setNationality(authorDto.nationality());
-		author.setBirthdate(authorDto.birthdate());
+			author.setName(authorDto.name());
+			author.setNationality(authorDto.nationality());
+			author.setBirthdate(authorDto.birthdate());
 
-		authorService.update(author);
+			authorService.update(author);
 
-		return ResponseEntity.noContent().build();
+			return ResponseEntity.noContent().build();
+		}catch (DuplicatedRegisterException e){
+			ErrorResponse errorResponse = ErrorResponse.conflict(e.getMessage());
+			return ResponseEntity.status(errorResponse.status()).body(errorResponse);
+		}
 	}
 }

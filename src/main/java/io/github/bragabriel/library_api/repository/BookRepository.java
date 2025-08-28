@@ -31,6 +31,8 @@ public interface BookRepository extends JpaRepository<Book, UUID> {
 
     List<Book> findByGenre(BookGenreEnum genre, Sort sort);
 
+	boolean existsByAuthor(Author author);
+
     //JPQL - Named parameter
     @Query("SELECT b FROM Book b WHERE b.price<=:price ORDER BY b.title, b.price")
     List<Book> listAllOrderedByTitleAndPrice(
