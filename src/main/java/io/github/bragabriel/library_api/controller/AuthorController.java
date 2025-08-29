@@ -6,6 +6,7 @@ import io.github.bragabriel.library_api.exceptions.DuplicatedRegisterException;
 import io.github.bragabriel.library_api.exceptions.NotAllowedException;
 import io.github.bragabriel.library_api.model.Author;
 import io.github.bragabriel.library_api.service.AuthorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class AuthorController {
 	private final AuthorService authorService;
 
 	@PostMapping
-	public ResponseEntity<Object> save(@RequestBody AuthorDto author){
+	public ResponseEntity<Object> save(@RequestBody @Valid AuthorDto author){
 		try{
 			Author authorEntity = author.mapToAuthorEntity();
 			authorService.save(authorEntity);
