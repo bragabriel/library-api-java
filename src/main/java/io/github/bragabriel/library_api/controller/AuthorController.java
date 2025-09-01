@@ -4,6 +4,7 @@ import io.github.bragabriel.library_api.dto.AuthorDto;
 import io.github.bragabriel.library_api.dto.ErrorResponse;
 import io.github.bragabriel.library_api.exceptions.DuplicatedRegisterException;
 import io.github.bragabriel.library_api.exceptions.NotAllowedException;
+import io.github.bragabriel.library_api.mapper.AuthorMapper;
 import io.github.bragabriel.library_api.model.Author;
 import io.github.bragabriel.library_api.service.AuthorService;
 import jakarta.validation.Valid;
@@ -27,11 +28,12 @@ import java.util.stream.Collectors;
 public class AuthorController {
 
 	private final AuthorService authorService;
+	private final AuthorMapper authorMapper;
 
 	@PostMapping
-	public ResponseEntity<Object> save(@RequestBody @Valid AuthorDto author){
+	public ResponseEntity<Object> save(@RequestBody @Valid AuthorDto dto){
 		try{
-			Author authorEntity = author.mapToAuthorEntity();
+			Author authorEntity = authorMapper.toEntity(dto);
 			authorService.save(authorEntity);
 
 			URI location = ServletUriComponentsBuilder
@@ -53,7 +55,7 @@ public class AuthorController {
 		Author author = authorService.getById(idAuthor)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-		AuthorDto dto = new AuthorDto(author.getId(), author.getName(), author.getBirthdate(), author.getNationality());
+		AuthorDto dto = authorMapper.toDto(author);
 
 		return ResponseEntity.ok(dto);
 	}
@@ -81,12 +83,7 @@ public class AuthorController {
 		List<Author> authors = authorService.find(name, nationality);
 
 		List<AuthorDto> authorDtos = authors.stream()
-				.map(author -> new AuthorDto(
-						author.getId(),
-						author.getName(),
-						author.getBirthdate(),
-						author.getNationality()
-				)).collect(Collectors.toList());
+				.map(authorMapper::toDto).collect(Collectors.toList());
 
 		return ResponseEntity.ok(authorDtos);
 	}

@@ -44,5 +44,6 @@ public class Author {
 	@LastModifiedDate
 	private LocalDateTime updatedAt;
 
+	@Column(name = "id_user")
 	private UUID userId;
 }
