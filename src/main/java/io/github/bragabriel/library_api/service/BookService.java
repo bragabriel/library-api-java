@@ -1,6 +1,8 @@
 package io.github.bragabriel.library_api.service;
 
-import io.github.bragabriel.library_api.dto.AuthorDto;
+import io.github.bragabriel.library_api.dto.BookCreateDto;
+import io.github.bragabriel.library_api.mapper.BookMapper;
+import io.github.bragabriel.library_api.model.Book;
 import io.github.bragabriel.library_api.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,8 +12,10 @@ import org.springframework.stereotype.Service;
 public class BookService {
 
 	private final BookRepository bookRepository;
+	private final BookMapper bookMapper;
 
-	public void save(AuthorDto dto){
-
+	public Book save(BookCreateDto dto){
+		Book book = bookMapper.toEntity(dto);
+		return bookRepository.save(book);
 	}
 }

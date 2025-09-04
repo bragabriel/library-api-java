@@ -22,8 +22,8 @@ public class BookController {
 	@PostMapping
 	public ResponseEntity<Object> save(@RequestBody @Valid BookCreateDto dto){
 		try{
-			//var savedBook = bookService.save(dto);
-			return ResponseEntity.status(201).body(dto);
+			var savedBook = bookService.save(dto);
+			return ResponseEntity.status(201).body(savedBook);
 		}catch (DuplicatedRegisterException e){
 			var error = ErrorResponse.conflict(e.getMessage());
 			return ResponseEntity.status(error.status()).body(error);
