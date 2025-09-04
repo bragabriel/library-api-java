@@ -2,6 +2,8 @@ package io.github.bragabriel.library_api.handler;
 
 import io.github.bragabriel.library_api.dto.ErrorField;
 import io.github.bragabriel.library_api.dto.ErrorResponse;
+import io.github.bragabriel.library_api.exceptions.DuplicatedRegisterException;
+import io.github.bragabriel.library_api.exceptions.NotAllowedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,8 +17,8 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ErrorResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e){
 		List<FieldError> fieldErrors = e.getFieldErrors();
 		List<ErrorField> errorsList = fieldErrors
@@ -26,4 +28,27 @@ public class GlobalExceptionHandler {
 
 		return new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Validation error", errorsList);
 	}
+
+	@ResponseStatus(HttpStatus.CONFLICT)
+	@ExceptionHandler(DuplicatedRegisterException.class)
+	public ErrorResponse handleDuplicatedRegisterException(DuplicatedRegisterException e){
+		return ErrorResponse.conflict(e.getMessage());
+	}
+
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(NotAllowedException.class)
+	public ErrorResponse handleNotAllowedException(NotAllowedException e){
+		return ErrorResponse.defaultResponse(e.getMessage());
+	}
+
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	@ExceptionHandler(RuntimeException.class)
+	public ErrorResponse handleDefaultError(RuntimeException e){
+		return new ErrorResponse(
+				HttpStatus.INTERNAL_SERVER_ERROR.value(),
+				"An unexpected error occurred. Please contact your administrator.",
+				List.of()
+		);
+	}
+
 }

@@ -25,26 +25,21 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/authors")
 @RequiredArgsConstructor
-public class AuthorController implements GenericController{
+public class AuthorController implements GenericController {
 
 	private final AuthorService authorService;
 	private final AuthorMapper authorMapper;
 
 	@PostMapping
-	public ResponseEntity<Object> save(@RequestBody @Valid AuthorDto dto){
-		try{
-			Author authorEntity = authorMapper.toEntity(dto);
-			authorService.save(authorEntity);
-			URI location = generateHeaderLocation(authorEntity.getId());
-			return ResponseEntity.created(location).build();
-		}catch (DuplicatedRegisterException e){
-			ErrorResponse errorResponse = ErrorResponse.conflict(e.getMessage());
-			return ResponseEntity.status(errorResponse.status()).body(errorResponse);
-		}
+	public ResponseEntity<Void> save(@RequestBody @Valid AuthorDto dto) {
+		Author authorEntity = authorMapper.toEntity(dto);
+		authorService.save(authorEntity);
+		URI location = generateHeaderLocation(authorEntity.getId());
+		return ResponseEntity.created(location).build();
 	}
 
 	@GetMapping("{id}")
-	public ResponseEntity<AuthorDto> getDetails(@PathVariable("id") String id){
+	public ResponseEntity<AuthorDto> getDetails(@PathVariable("id") String id) {
 		var idAuthor = UUID.fromString(id);
 		Author author = authorService.getById(idAuthor)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -55,25 +50,21 @@ public class AuthorController implements GenericController{
 	}
 
 	@DeleteMapping("{id}")
-	public ResponseEntity<Object> delete(@PathVariable("id") String id){
-		try{
-			var idAuthor = UUID.fromString(id);
-			Author author = authorService.getById(idAuthor)
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+	public ResponseEntity<Void> delete(@PathVariable("id") String id) {
+		var idAuthor = UUID.fromString(id);
 
-			authorService.delete(author);
-			return ResponseEntity.noContent().build();
-		}catch (NotAllowedException e){
-			ErrorResponse errorResponse = ErrorResponse.defaultResponse(e.getMessage());
-			return ResponseEntity.status(errorResponse.status()).body(errorResponse);
-		}
+		Author author = authorService.getById(idAuthor)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
+		authorService.delete(author);
+
+		return ResponseEntity.noContent().build();
 	}
 
 	@GetMapping
 	public ResponseEntity<List<AuthorDto>> find(
-			@RequestParam(value="name", required = false) String name,
-			@RequestParam(value="nationality", required = false) String nationality){
+			@RequestParam(value = "name", required = false) String name,
+			@RequestParam(value = "nationality", required = false) String nationality) {
 		List<Author> authors = authorService.find(name, nationality);
 
 		List<AuthorDto> authorDtos = authors.stream()
@@ -83,25 +74,20 @@ public class AuthorController implements GenericController{
 	}
 
 	@PutMapping("{id}")
-	public ResponseEntity<Object> update(
+	public ResponseEntity<Void> update(
 			@PathVariable("id") String id,
 			@RequestBody AuthorDto authorDto
 	) {
-		try{
-			var idAuthor = UUID.fromString(id);
-			Author author = authorService.getById(idAuthor)
-					.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		var idAuthor = UUID.fromString(id);
+		Author author = authorService.getById(idAuthor)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-			author.setName(authorDto.name());
-			author.setNationality(authorDto.nationality());
-			author.setBirthdate(authorDto.birthdate());
+		author.setName(authorDto.name());
+		author.setNationality(authorDto.nationality());
+		author.setBirthdate(authorDto.birthdate());
 
-			authorService.update(author);
+		authorService.update(author);
 
-			return ResponseEntity.noContent().build();
-		}catch (DuplicatedRegisterException e){
-			ErrorResponse errorResponse = ErrorResponse.conflict(e.getMessage());
-			return ResponseEntity.status(errorResponse.status()).body(errorResponse);
-		}
+		return ResponseEntity.noContent().build();
 	}
 }
