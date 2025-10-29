@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static io.github.bragabriel.library_api.repository.specs.BookSpecs.*;
+
 @Service
 @RequiredArgsConstructor
 public class BookService {
@@ -41,23 +43,23 @@ public class BookService {
                 .where((root, query, cb) -> cb.conjunction());
 
         if(isbn != null){
-            specs = specs.and(BookSpecs.isbnEqual(isbn));
+            specs = specs.and(isbnEqual(isbn));
         }
 
         if(title != null){
-            specs = specs.and(BookSpecs.titleLike(title));
+            specs = specs.and(titleLike(title));
         }
 
         if(nameAuthor != null){
-            specs = specs.and(BookSpecs.nameAuthorLike(nameAuthor));
+            specs = specs.and(nameAuthorLike(nameAuthor));
         }
 
         if(genre != null){
-            specs = specs.and(BookSpecs.genreEqual(genre));
+            specs = specs.and(genreEqual(genre));
         }
 
         if(publicationDate != null){
-            specs = specs.and(BookSpecs.publicationDateEqual(publicationDate));
+            specs = specs.and(publicationDateEqual(publicationDate));
         }
 
         return bookRepository.findAll();
