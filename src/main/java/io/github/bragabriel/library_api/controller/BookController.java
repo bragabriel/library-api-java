@@ -1,7 +1,9 @@
 package io.github.bragabriel.library_api.controller;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -10,12 +12,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.github.bragabriel.library_api.dto.BookCreateDto;
 import io.github.bragabriel.library_api.dto.SearchBookResultDto;
 import io.github.bragabriel.library_api.mapper.BookMapper;
 import io.github.bragabriel.library_api.model.Book;
+import io.github.bragabriel.library_api.model.BookGenreEnum;
 import io.github.bragabriel.library_api.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,4 +57,16 @@ public class BookController implements GenericController {
                 }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping
+    public ResponseEntity<List<SearchBookResultDto>> find(
+            @RequestParam(value = "isbn", required = false) String isbn,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "name-author", required = false) String nameAuthor,
+            @RequestParam(value = "genre", required = false) BookGenreEnum genre,
+            @RequestParam(value = "publication-date", required = false) Integer publicationDate) {
+        List<Book> books = bookService.find(isbn, title, nameAuthor, genre, publicationDate);
+        List<SearchBookResultDto> dtos = books.stream()
+                .map(mapper::toDto).collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
 }

@@ -39,8 +39,7 @@ public class BookService {
 
     public List<Book> find(String isbn, String title, String nameAuthor, BookGenreEnum genre, Integer publicationDate){
         //Initializing specification (1 = 1)
-        Specification<Book> specs = Specification
-                .where((root, query, cb) -> cb.conjunction());
+        Specification<Book> specs = (root, query, cb) -> cb.conjunction();
 
         if(isbn != null){
             specs = specs.and(isbnEqual(isbn));
