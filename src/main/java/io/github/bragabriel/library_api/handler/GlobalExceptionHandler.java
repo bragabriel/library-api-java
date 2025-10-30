@@ -3,6 +3,7 @@ package io.github.bragabriel.library_api.handler;
 import io.github.bragabriel.library_api.dto.ErrorField;
 import io.github.bragabriel.library_api.dto.ErrorResponse;
 import io.github.bragabriel.library_api.exceptions.DuplicatedRegisterException;
+import io.github.bragabriel.library_api.exceptions.InvalidFieldException;
 import io.github.bragabriel.library_api.exceptions.NotAllowedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
@@ -34,6 +35,16 @@ public class GlobalExceptionHandler {
 	public ErrorResponse handleDuplicatedRegisterException(DuplicatedRegisterException e){
 		return ErrorResponse.conflict(e.getMessage());
 	}
+
+    @ExceptionHandler(InvalidFieldException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleFieldException(InvalidFieldException e){
+        return new ErrorResponse(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Validation error",
+                List.of(new ErrorField(e.getField(), e.getMessage()))
+        );
+    }
 
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(NotAllowedException.class)
