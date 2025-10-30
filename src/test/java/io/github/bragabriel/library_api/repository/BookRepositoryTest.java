@@ -234,29 +234,16 @@ class BookRepositoryTest {
     }
 
     @Test
-    void explicacaoVideo(){
-        Author author = Author.builder()
-            .name("Gabriel")
-            .birthdate(LocalDate.of(2000, 1, 31))
-            .nationality("Brazilian")
-            .build();
+    void searchByIsbnTest(){
+        Book book = createAndSaveBookWithExistingAuthor();
 
-        Book book = Book.builder()
-            .isbn("isbn")
-            .title("asd")
-            .publicationDate(LocalDate.now())
-            .genre(BookGenreEnum.FANTASY)
-            .price(BigDecimal.valueOf(50))
-            .author(author)
-            .build();
+        Book fetchedBook = bookRepository.findByIsbn("123").orElseThrow();
 
-        var authorSaved = authorRepository.save(author);
-        assertNotNull(authorSaved);
-        var bookSaved = bookRepository.save(book);
-        assertNotNull(bookSaved);
-
-        author.setBookList(List.of(bookSaved));
-        authorRepository.save(author);
+        assertEquals(book.getId(), fetchedBook.getId());
+        assertEquals(book.getIsbn(), fetchedBook.getIsbn());
+        assertEquals(book.getPrice(), fetchedBook.getPrice());
+        assertEquals(book.getAuthor().getId(), fetchedBook.getAuthor().getId());
+        assertEquals(book.getAuthor().getName(), fetchedBook.getAuthor().getName());
     }
 
     private Author createAndSaveAuthorWithBooks() {

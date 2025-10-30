@@ -6,6 +6,7 @@ import io.github.bragabriel.library_api.model.Book;
 import io.github.bragabriel.library_api.model.BookGenreEnum;
 import io.github.bragabriel.library_api.repository.BookRepository;
 import io.github.bragabriel.library_api.repository.specs.BookSpecs;
+import io.github.bragabriel.library_api.validator.BookValidator;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.jpa.domain.Specification;
@@ -23,9 +24,11 @@ public class BookService {
 
 	private final BookRepository bookRepository;
 	private final BookMapper bookMapper;
+    private final BookValidator validator;
 
 	public Book save(BookCreateDto dto){
 		Book book = bookMapper.toEntity(dto);
+        validator.validate(book);
 		return bookRepository.save(book);
 	}
 
@@ -65,6 +68,7 @@ public class BookService {
     }
 
     public void update(Book book) {
+        validator.validate(book);
         bookRepository.save(book);
     }
 }

@@ -29,8 +29,8 @@ class AuthorRepositoryTest {
 
     @BeforeEach
     public void setUp(){
-        authorRepository.deleteAll();
         bookRepository.deleteAll();
+        authorRepository.deleteAll();
     }
 
     @Test

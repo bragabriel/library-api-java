@@ -6,6 +6,7 @@ import io.github.bragabriel.library_api.model.BookGenreEnum;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 
 @UtilityClass
@@ -50,7 +51,7 @@ public class BookObjectMother {
                 .title("The adventures of something")
                 .publicationDate(LocalDate.now())
                 .genre(BookGenreEnum.FANTASY)
-                .price(BigDecimal.TEN)
+                .price(BigDecimal.valueOf(10).setScale(2, RoundingMode.UNNECESSARY))
                 .author(author)
                 .build();
     }

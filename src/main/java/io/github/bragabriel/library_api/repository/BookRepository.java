@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -31,6 +32,8 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
     List<Book> findByTitleOrGenre(String title, BookGenreEnum genre);
 
     List<Book> findByGenre(BookGenreEnum genre, Sort sort);
+
+    Optional<Book> findByIsbn(String isbn);
 
 	boolean existsByAuthor(Author author);
 
