@@ -64,4 +64,7 @@ public class BookService {
         return bookRepository.findAll();
     }
 
+    public void update(Book book) {
+        bookRepository.save(book);
+    }
 }
