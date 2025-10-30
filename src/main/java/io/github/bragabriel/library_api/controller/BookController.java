@@ -3,9 +3,8 @@ package io.github.bragabriel.library_api.controller;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,16 +59,21 @@ public class BookController implements GenericController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SearchBookResultDto>> find(
+    public ResponseEntity<Page<SearchBookResultDto>> find(
             @RequestParam(value = "isbn", required = false) String isbn,
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "name-author", required = false) String nameAuthor,
             @RequestParam(value = "genre", required = false) BookGenreEnum genre,
-            @RequestParam(value = "publication-date", required = false) Integer publicationDate) {
-        List<Book> books = bookService.find(isbn, title, nameAuthor, genre, publicationDate);
-        List<SearchBookResultDto> dtos = books.stream()
-                .map(mapper::toDto).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+            @RequestParam(value = "publication-date", required = false) Integer publicationDate,
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "page-size", defaultValue = "10") Integer pageSize
+            ) {
+        Page<Book> pageResult = bookService.find(
+                isbn, title, nameAuthor, genre, publicationDate, page, pageSize);
+
+        Page<SearchBookResultDto> result = pageResult.map(mapper::toDto);
+
+        return ResponseEntity.ok(result);
     }
 
     @PutMapping("{id}")

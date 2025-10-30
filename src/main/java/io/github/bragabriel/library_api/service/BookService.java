@@ -1,22 +1,27 @@
 package io.github.bragabriel.library_api.service;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+
+import static io.github.bragabriel.library_api.repository.specs.BookSpecs.genreEqual;
+import static io.github.bragabriel.library_api.repository.specs.BookSpecs.isbnEqual;
+import static io.github.bragabriel.library_api.repository.specs.BookSpecs.nameAuthorLike;
+import static io.github.bragabriel.library_api.repository.specs.BookSpecs.publicationDateEqual;
+import static io.github.bragabriel.library_api.repository.specs.BookSpecs.titleLike;
+
 import io.github.bragabriel.library_api.dto.BookCreateDto;
 import io.github.bragabriel.library_api.mapper.BookMapper;
 import io.github.bragabriel.library_api.model.Book;
 import io.github.bragabriel.library_api.model.BookGenreEnum;
 import io.github.bragabriel.library_api.repository.BookRepository;
-import io.github.bragabriel.library_api.repository.specs.BookSpecs;
 import io.github.bragabriel.library_api.validator.BookValidator;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static io.github.bragabriel.library_api.repository.specs.BookSpecs.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +45,8 @@ public class BookService {
         bookRepository.delete(book);
     }
 
-    public List<Book> find(String isbn, String title, String nameAuthor, BookGenreEnum genre, Integer publicationDate){
+    public Page<Book> find(String isbn, String title, String nameAuthor, BookGenreEnum genre, Integer publicationDate,
+                           Integer page, Integer pageSize){
         //Initializing specification (1 = 1)
         Specification<Book> specs = (root, query, cb) -> cb.conjunction();
 
@@ -64,7 +70,9 @@ public class BookService {
             specs = specs.and(publicationDateEqual(publicationDate));
         }
 
-        return bookRepository.findAll();
+        Pageable pageable = PageRequest.of(page, pageSize);
+
+        return bookRepository.findAll(specs, pageable);
     }
 
     public void update(Book book) {
