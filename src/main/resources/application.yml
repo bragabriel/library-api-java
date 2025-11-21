@@ -10,4 +10,8 @@ spring:
     show-sql: true
     hibernate:
       ddl-auto: update
+  sql:
+    init:
+      mode: never
+      schema-locations: classpath:db/data.sql
 
