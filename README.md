@@ -64,6 +64,51 @@ This project is aimed to strengthen knowledge in:
 - Dockerized deployments and cloud infrastructure
 - JPA Entity States (`Transient`, `Persistent`, `Detached`, `Removed`) ️
 
+## How to Run
+### 🐳 Running PostgreSQL + pgAdmin (Docker Setup)
+
+This project includes a local PostgreSQL database and pgAdmin UI using Docker. 
+
+Below are the exact steps to start 
+everything and connect pgAdmin to your database.
+
+#### 1️⃣ Start the containers
+
+```docker-compose up -d```
+
+This will start:
+
+- PostgreSQL at localhost:5432
+- pgAdmin at localhost:15432
+
+#### 2️⃣ Access pgAdmin
+
+Open in your browser: http://localhost:15432
+
+Login:
+- Email: ```admin@admin.com```
+- Password: ```admin```
+
+#### 3️⃣ Register the PostgreSQL server inside pgAdmin
+
+pgAdmin does not auto-detect Docker containers.
+You must register the server manually:
+
+#### Steps
+
+1. Right-click **Servers**
+2. Select **Register → Server**
+3. In the **General** tab:
+    - Set **Name:** `librarydb` (any name is fine)
+4. In the **Connection** tab:
+    - **Host:** `librarydb`
+    - **Port:** `5432`
+    - **Username:** `postgres`
+    - **Password:** `postgres`
+    - **Database:** `library`
+
 ---
+
+## Contributions Welcome
 
 Feel free to fork or contribute. This is a learning sandbox to explore real-world backend scenarios.
