@@ -21,3 +21,10 @@ create table book(
 	id_author uuid not null references author(id)
 	constraint chk_genre check(genre in ('FICTION', 'FANTASY', 'MYSTERY', 'ROMANCE', 'BIOGRAPHY', 'SCIENCE'))
 );
+
+create table user(
+    id uuid not null primary key,
+    login varchar(20) not null unique,
+    password varchar(300) not null,
+    roles varchar[]
+);
