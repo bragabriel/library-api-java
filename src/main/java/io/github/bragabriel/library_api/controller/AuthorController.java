@@ -1,27 +1,30 @@
 package io.github.bragabriel.library_api.controller;
 
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
+
 import io.github.bragabriel.library_api.dto.AuthorDto;
-import io.github.bragabriel.library_api.dto.ErrorResponse;
-import io.github.bragabriel.library_api.exceptions.DuplicatedRegisterException;
-import io.github.bragabriel.library_api.exceptions.NotAllowedException;
 import io.github.bragabriel.library_api.mapper.AuthorMapper;
 import io.github.bragabriel.library_api.model.Author;
 import io.github.bragabriel.library_api.service.AuthorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/authors")
@@ -34,7 +37,7 @@ public class AuthorController implements GenericController {
 	@PostMapping
     @PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> save(@RequestBody @Valid AuthorDto dto) {
-		Author authorEntity = authorMapper.toEntity(dto);
+        Author authorEntity = authorMapper.toEntity(dto);
 		authorService.save(authorEntity);
 		URI location = generateHeaderLocation(authorEntity.getId());
 		return ResponseEntity.created(location).build();

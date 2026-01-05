@@ -20,6 +20,7 @@ import io.github.bragabriel.library_api.mapper.BookMapper;
 import io.github.bragabriel.library_api.model.Book;
 import io.github.bragabriel.library_api.model.BookGenreEnum;
 import io.github.bragabriel.library_api.repository.BookRepository;
+import io.github.bragabriel.library_api.security.SecurityService;
 import io.github.bragabriel.library_api.validator.BookValidator;
 import lombok.RequiredArgsConstructor;
 
@@ -30,10 +31,12 @@ public class BookService {
 	private final BookRepository bookRepository;
 	private final BookMapper bookMapper;
     private final BookValidator validator;
+    private final SecurityService securityService;
 
 	public Book save(BookCreateDto dto){
 		Book book = bookMapper.toEntity(dto);
         validator.validate(book);
+        book.setUser(securityService.getLoggedUser());
 		return bookRepository.save(book);
 	}
 
