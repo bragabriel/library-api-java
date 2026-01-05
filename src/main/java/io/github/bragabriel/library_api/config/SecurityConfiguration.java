@@ -15,6 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import io.github.bragabriel.library_api.security.CustomUserDetailsService;
+import io.github.bragabriel.library_api.service.UserService;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
@@ -45,20 +48,8 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder encoder){
-        UserDetails user1 = User.builder()
-                .username("user")
-                .password(encoder.encode("user"))
-                .roles("USER")
-                .build();
-
-        UserDetails user2 = User.builder()
-                .username("admin")
-                .password(encoder.encode("admin"))
-                .roles("ADMIN")
-                .build();
-
-        return new InMemoryUserDetailsManager(user1, user2);
+    public UserDetailsService userDetailsService(UserService userService){
+        return new CustomUserDetailsService(userService);
     }
 
 }
