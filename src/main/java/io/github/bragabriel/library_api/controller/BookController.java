@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +35,7 @@ public class BookController implements GenericController {
 	private final BookMapper mapper;
 
 	@PostMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 	public ResponseEntity<Void> save(@RequestBody @Valid BookCreateDto dto) {
 		Book savedBook = bookService.save(dto);
 		URI url = generateHeaderLocation(savedBook.getId());
@@ -41,7 +43,8 @@ public class BookController implements GenericController {
 	}
 
 	@GetMapping("{id}")
-	public ResponseEntity<SearchBookResultDto> getDetails(@PathVariable("id") String id){
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<SearchBookResultDto> getDetails(@PathVariable("id") String id){
 		return bookService.getById(UUID.fromString(id))
 				.map(book -> {
 					var dto = mapper.toDto(book);
@@ -50,6 +53,7 @@ public class BookController implements GenericController {
 	}
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Object> delete(@PathVariable("id") String id){
         return bookService.getById(UUID.fromString(id))
                 .map(book -> {
@@ -59,6 +63,7 @@ public class BookController implements GenericController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Page<SearchBookResultDto>> find(
             @RequestParam(value = "isbn", required = false) String isbn,
             @RequestParam(value = "title", required = false) String title,
@@ -77,6 +82,7 @@ public class BookController implements GenericController {
     }
 
     @PutMapping("{id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<Object> update(
             @PathVariable("id") String id,
             @RequestBody @Valid BookCreateDto dto){

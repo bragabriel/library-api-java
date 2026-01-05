@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -31,6 +32,7 @@ public class AuthorController implements GenericController {
 	private final AuthorMapper authorMapper;
 
 	@PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> save(@RequestBody @Valid AuthorDto dto) {
 		Author authorEntity = authorMapper.toEntity(dto);
 		authorService.save(authorEntity);
@@ -39,7 +41,8 @@ public class AuthorController implements GenericController {
 	}
 
 	@GetMapping("{id}")
-	public ResponseEntity<AuthorDto> getDetails(@PathVariable("id") String id) {
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<AuthorDto> getDetails(@PathVariable("id") String id) {
 		var idAuthor = UUID.fromString(id);
 		Author author = authorService.getById(idAuthor)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -50,7 +53,8 @@ public class AuthorController implements GenericController {
 	}
 
 	@DeleteMapping("{id}")
-	public ResponseEntity<Void> delete(@PathVariable("id") String id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable("id") String id) {
 		var idAuthor = UUID.fromString(id);
 
 		Author author = authorService.getById(idAuthor)
@@ -62,7 +66,8 @@ public class AuthorController implements GenericController {
 	}
 
 	@GetMapping
-	public ResponseEntity<List<AuthorDto>> find(
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<List<AuthorDto>> find(
 			@RequestParam(value = "name", required = false) String name,
 			@RequestParam(value = "nationality", required = false) String nationality) {
 		List<Author> authors = authorService.find(name, nationality);
@@ -74,7 +79,8 @@ public class AuthorController implements GenericController {
 	}
 
 	@PutMapping("{id}")
-	public ResponseEntity<Void> update(
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<Void> update(
 			@PathVariable("id") String id,
 			@RequestBody AuthorDto authorDto
 	) {
